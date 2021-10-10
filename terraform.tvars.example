@@ -1,0 +1,21 @@
+# Digitalocean Configuration
+digitalocean_token = ""
+digitalocean_droplet_image = "docker-20-04"
+digitalocean_droplet_region = "lon1"
+digitalocean_droplet_size = "s-1vcpu-1gb"
+digitalocean_key_name = ""
+digitalocean_priv_key_path = ""
+
+# Cloudflare Configuration
+cloudflare_domain = ""
+cloudflare_account_id = ""
+cloudflare_tunnel_secret = "Some-very-secret-passphrase-you-only-know"
+cloudflare_cname_record = "grafana"
+
+# Used by Terraform to manage your Cloudflare resources
+cloudflare_api_token = ""
+# Used by the Prometheus Exporter to pull your analytics from Cloudflare GraphQL
+cloudflare_analytics_api_token = ""
+
+# Authorized user for Cloudflare Access
+user_email = "vortexmind@gmail.com"
