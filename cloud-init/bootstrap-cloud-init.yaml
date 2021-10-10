@@ -1,0 +1,98 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+
+packages:
+  - wget
+
+write_files:
+  - content: |
+      {
+        "AccountTag"   : "${account_id}",
+        "TunnelID"     : "${cloudflare_tunnel_id}",
+        "TunnelName"   : "${cloudflare_tunnel_name}",
+        "TunnelSecret" : "${cloudflare_tunnel_secret}"
+      }
+    path: /etc/cloudflared/cert.json
+  - content: |
+      tunnel: ${cloudflare_tunnel_id}
+      credentials-file: /etc/cloudflared/cert.json
+      logfile: /var/log/cloudflared.log
+      loglevel: info
+
+      ingress:
+        - hostname: ${fqdn}
+          service: http://localhost:3000
+        - service: http_status:404
+    path: /etc/cloudflared/config.yml
+  - content: |
+      global:
+        scrape_interval: 15s
+        evaluation_interval: 15s
+      
+      alerting:
+        alertmanagers:
+          - static_configs:
+              - targets:
+                # - alertmanager:9093
+
+      scrape_configs:
+        - job_name: "website_data_fom_cloudflare"
+
+          # metrics_path defaults to '/metrics'
+          # scheme defaults to 'http'.
+
+          static_configs:
+            - targets: ["prometheus_exporter:8080"]
+    path: /opt/scripts/prometheus.yml
+  - content: |
+      version: '3.8'
+
+      services:
+      
+        prometheus:
+          image: prom/prometheus:latest
+          ports:
+            - 9090:9090
+          volumes:
+            - /opt/scripts/prometheus.yml:/etc/prometheus/prometheus.yml
+          depends_on:
+            - prometheus_exporter
+          networks:
+            - base_net
+
+        prometheus_exporter:
+          image: lablabs/cloudflare_exporter:latest
+          ports:
+            - 8080:8080
+          environment:
+            - CF_API_TOKEN=${cloudflare_analytics_api_token}
+          networks:
+            - base_net
+
+        grafana:
+          image: grafana/grafana:latest
+          ports:
+            - 3000:3000
+          networks:
+            - base_net
+          depends_on:
+            - prometheus_exporter
+            - prometheus
+            
+      networks:
+        base_net:
+
+    path: /opt/scripts/docker-compose.yml
+runcmd:
+- mkdir -p /etc/cloudflared
+- mkdir -p /opt/scripts
+- wget -O /tmp/cloudflared-linux-amd64.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+- dpkg -i /tmp/cloudflared-linux-amd64.deb
+- cloudflared service install
+- systemctl start cloudflared
+- systemctl enable cloudflared
+- cd /opt/scripts
+- docker-compose up -d
