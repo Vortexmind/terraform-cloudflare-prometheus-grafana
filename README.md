@@ -8,7 +8,7 @@ A sample environment on Digitalocean for monitoring the metrics of a given Cloud
 - The Grafana instance is reachable via a Cloudflare Tunnel
  
 ## Documentation
-Coming soon
+https://www.paolotagliaferri.com/monitor-your-website-with-cloudflare-prometheus-grafana/
 
 ## License
 This work is available under [MIT License](https://github.com/Vortexmind/terraform-cloudflare-prometheus-grafana/blob/main/LICENSE)
