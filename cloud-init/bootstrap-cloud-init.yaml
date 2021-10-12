@@ -25,6 +25,8 @@ write_files:
       ingress:
         - hostname: ${fqdn}
           service: http://localhost:3000
+        - hostname: ${ssh_fqdn}
+          service: ssh://localhost:22
         - service: http_status:404
     path: /etc/cloudflared/config.yml
   - content: |
@@ -94,5 +96,11 @@ runcmd:
 - cloudflared service install
 - systemctl start cloudflared
 - systemctl enable cloudflared
+- touch /etc/ssh/ca.pub
+- echo -n "${trusted_pub_key}" >> /etc/ssh/ca.pub
+- echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config
+- echo "TrustedUserCAKeys /etc/ssh/ca.pub" >> /etc/ssh/sshd_config
+- adduser --disabled-password --gecos "" ${user}
+- systemctl restart ssh
 - cd /opt/scripts
 - docker-compose up -d

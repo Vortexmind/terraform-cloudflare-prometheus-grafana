@@ -6,6 +6,8 @@ output "success_message" {
     Direct SSH Command (only allowed from ${chomp(data.http.my_ip.body)} : 
         ssh -i ${var.digitalocean_priv_key_path} root@${digitalocean_droplet.prometheus_analytics.ipv4_address}
 
+    Or navigate to https://${local.cloudflare_ssh_fqdn} to use Browser Based authentication.
+
     It takes some time for the Droplet to boot up and start the stack. To check progress, SSH in the droplet and run 
     less /var/log/cloud-init-output.log
 
