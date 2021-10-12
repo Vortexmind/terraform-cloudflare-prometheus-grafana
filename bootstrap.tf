@@ -22,6 +22,7 @@ provider "cloudflare" {
 
 locals {
     cloudflare_fqdn = format("%s.%s",var.cloudflare_cname_record,var.cloudflare_domain)
+    cloudflare_ssh_fqdn = format("%s.%s",var.cloudflare_ssh_cname_record,var.cloudflare_domain)
     user_from_mail = split("@", var.user_email)[0]
 }
 
@@ -35,6 +36,7 @@ variable "cloudflare_domain" {}
 variable "cloudflare_account_id" {}
 variable "cloudflare_tunnel_secret" {}
 variable "cloudflare_cname_record" {}
+variable "cloudflare_ssh_cname_record" {}
 variable "cloudflare_api_token" {}
 variable "cloudflare_analytics_api_token" {}
 variable "user_email" {}

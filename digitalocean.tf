@@ -22,9 +22,11 @@ resource "digitalocean_droplet" "prometheus_analytics" {
   user_data = templatefile("${path.module}/cloud-init/bootstrap-cloud-init.yaml", {
       account_id = var.cloudflare_account_id
       fqdn = local.cloudflare_fqdn
+      ssh_fqdn = local.cloudflare_ssh_fqdn
       cloudflare_tunnel_id = cloudflare_argo_tunnel.prometheus_analytics.id
       cloudflare_tunnel_name = cloudflare_argo_tunnel.prometheus_analytics.name
       cloudflare_tunnel_secret = cloudflare_argo_tunnel.prometheus_analytics.secret
+      trusted_pub_key = cloudflare_access_ca_certificate.ssh_short_lived.public_key
       cloudflare_analytics_api_token = var.cloudflare_analytics_api_token
       user = local.user_from_mail
   })
@@ -57,7 +59,7 @@ resource "digitalocean_firewall" "cloudflare_prometheus_analytics_fw" {
   inbound_rule {
     protocol    = "tcp"
     port_range  = "22"
-    source_addresses = ["${chomp(data.http.my_ip.body)}"]
+    source_addresses = concat(["${chomp(data.http.my_ip.body)}"],data.cloudflare_ip_ranges.cloudflare.cidr_blocks)
   }
 
   inbound_rule {
